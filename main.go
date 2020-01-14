@@ -35,31 +35,34 @@ func main() {
         panic("plain length mismatch")
     }
 
+    fmt.Printf("Algorithm\t  Sign\t\t Verify\n")
+    fmt.Printf("------------------------------------------\n")
+
     sign, verify := RSAtest(plain, 2048)
-    fmt.Printf("RSA 2048,%d,%d\n", sign, verify)
+    fmt.Printf("RSA 2048\t%8d\t%8d\n", sign, verify)
     sign, verify = RSAtest(plain, 4096)
-    fmt.Printf("RSA 4096,%d,%d\n", sign, verify)
+    fmt.Printf("RSA 4096\t%8d\t%8d\n", sign, verify)
 
     sign, verify = DSAtest(plain, dsa.L1024N160)
-    fmt.Printf("DSA L1024N160,%d,%d\n", sign, verify)
+    fmt.Printf("DSA L1024N160\t%8d\t%8d\n", sign, verify)
     sign, verify = DSAtest(plain, dsa.L2048N224)
-    fmt.Printf("DSA L2048N224,%d,%d\n", sign, verify)
+    fmt.Printf("DSA L2048N224\t%8d\t%8d\n", sign, verify)
     sign, verify = DSAtest(plain, dsa.L2048N256)
-    fmt.Printf("DSA L2048N256,%d,%d\n", sign, verify)
+    fmt.Printf("DSA L2048N256\t%8d\t%8d\n", sign, verify)
     sign, verify = DSAtest(plain, dsa.L3072N256)
-    fmt.Printf("DSA L3072N256,%d,%d\n", sign, verify)
+    fmt.Printf("DSA L3072N256\t%8d\t%8d\n", sign, verify)
 
     sign, verify = ECDSAtest(plain, P224)
-    fmt.Printf("ECDSA P224,%d,%d\n", sign, verify)
+    fmt.Printf("ECDSA P224\t%8d\t%8d\n", sign, verify)
     sign, verify = ECDSAtest(plain, P256)
-    fmt.Printf("ECDSA P256,%d,%d\n", sign, verify)
+    fmt.Printf("ECDSA P256\t%8d\t%8d\n", sign, verify)
     sign, verify = ECDSAtest(plain, P384)
-    fmt.Printf("ECDSA P384,%d,%d\n", sign, verify)
+    fmt.Printf("ECDSA P384\t%8d\t%8d\n", sign, verify)
     sign, verify = ECDSAtest(plain, P521)
-    fmt.Printf("ECDSA P521,%d,%d\n", sign, verify)
+    fmt.Printf("ECDSA P521\t%8d\t%8d\n", sign, verify)
 
     sign, verify = EDDSAtest(plain)
-    fmt.Printf("EDDSA,%d,%d\n", sign, verify)
+    fmt.Printf("EDDSA25519\t%8d\t%8d\n", sign, verify)
 }
 
 func RSAtest(plain []byte, keyLen int) (int64, int64) {
