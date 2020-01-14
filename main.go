@@ -11,6 +11,7 @@ import (
     "crypto/dsa"
     "crypto/elliptic"
     "crypto/ecdsa"
+    "crypto/ed25519"
 )
 
 const MSG_LEN = 1500
@@ -56,6 +57,9 @@ func main() {
     fmt.Printf("ECDSA P384,%d,%d\n", sign, verify)
     sign, verify = ECDSAtest(plain, P521)
     fmt.Printf("ECDSA P521,%d,%d\n", sign, verify)
+
+    sign, verify = EDDSAtest(plain)
+    fmt.Printf("EDDSA,%d,%d\n", sign, verify)
 }
 
 func RSAtest(plain []byte, keyLen int) (int64, int64) {
@@ -119,6 +123,24 @@ func ECDSAtest(plain []byte, p ellipticCurve) (int64, int64) {
     return sign, result.T.Nanoseconds() / int64(result.N)
 }
 
+func EDDSAtest(plain []byte) (int64, int64) {
+    pub, priv, err := ed25519.GenerateKey(nil)
+    if err != nil {
+        panic(err)
+    }
+    result := testing.Benchmark(func(b *testing.B){ EDDSAsign(b, &priv, plain) })
+    sign := result.T.Nanoseconds() / int64(result.N)
+
+    hashed := sha256.Sum256(plain)
+    s := ed25519.Sign(priv, hashed[:])
+    if err != nil {
+        panic(err)
+    }
+
+    result = testing.Benchmark(func(b *testing.B){ EDDSAverify(b, &pub, plain, s) })
+    return sign, result.T.Nanoseconds() / int64(result.N)
+}
+
 func RSAsign(b *testing.B, priv *rsa.PrivateKey, plain []byte) {
     for i := 0; i < b.N; i++ {
         hashed := sha256.Sum256(plain)
@@ -178,6 +200,24 @@ func ECDSAverify(b *testing.B, priv *ecdsa.PrivateKey, plain []byte, r *big.Int,
     for i := 0; i < b.N; i++ {
         hashed := sha256.Sum256(plain)
         t := ecdsa.Verify(&priv.PublicKey, hashed[:], r, s)
+        if t != true {
+            panic("ECDSA verify failure")
+        }
+    }
+}
+
+func EDDSAsign(b *testing.B, priv *ed25519.PrivateKey, plain []byte) {
+    for i := 0; i < b.N; i++ {
+        hashed := sha256.Sum256(plain)
+        s := ed25519.Sign(*priv, hashed[:])
+        _ = s
+    }
+}
+
+func EDDSAverify(b *testing.B, pub *ed25519.PublicKey, plain []byte, s []byte) {
+    for i := 0; i < b.N; i++ {
+        hashed := sha256.Sum256(plain)
+        t := ed25519.Verify(*pub, hashed[:], s)
         if t != true {
             panic("ECDSA verify failure")
         }
